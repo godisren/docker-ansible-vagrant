@@ -1,0 +1,13 @@
+[docker-swarm-manager]
+192.168.50.2
+192.168.50.3
+
+[docker-swarm-worker]
+192.168.50.4
+192.168.50.5
+
+[all:vars]
+ansible_connection=ssh
+ansible_ssh_user=vagrant
+ansible_ssh_pass=vagrant
+ansible_become=true

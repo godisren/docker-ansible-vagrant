@@ -1,0 +1,39 @@
+- hosts: all
+  remote_user: root
+  tasks:
+  - name: update all packages
+    yum:
+     name: '*'
+     state: latest
+  - name: install docker
+    command: bash -c 'curl -fsSL https://get.docker.com/ | sh'
+  - name: start docker daemon
+    systemd:
+     name: docker
+     state: started
+  - name: enable docker daemon
+    systemd:
+     name: docker
+     enabled: yes
+- hosts: docker-swarm-manager[0]
+  tasks:
+  - name: initialize swarm cluster (leader)
+    shell: docker swarm init  --advertise-addr enp0s8
+  - name: retrieve swarm manager token
+    shell: docker swarm join-token manager | egrep '^    docker'
+    register: swarm_manager_token
+  - name: retrieve swarm worker token
+    shell: docker swarm join-token worker | egrep '^    docker'
+    register: swarm_worker_token
+- hosts: docker-swarm-manager:!docker-swarm-manager[0]
+  vars:
+    token: "{{ hostvars[groups['docker-swarm-manager'][0]]['swarm_manager_token']['stdout'] }}"
+  tasks:
+  - name: join swarm manager
+    shell: "{{token}}"
+- hosts: docker-swarm-worker
+  vars:
+    token: "{{ hostvars[groups['docker-swarm-manager'][0]]['swarm_worker_token']['stdout'] }}"
+  tasks:
+  - name: join swarm worker
+    shell: "{{token}}"
