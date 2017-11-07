@@ -10,5 +10,6 @@ vagrant up
 ansible-playbook -i inventory playbook.yml
 ```
 
-### 3. land Potainer dashboard 
+### 3. land Portainer dashboard 
 http://192.168.50.2:9000
+![portainer](portainer.png)
